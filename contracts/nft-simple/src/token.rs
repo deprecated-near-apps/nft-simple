@@ -11,7 +11,6 @@ pub struct Token {
     
     // CUSTOM - fields
     pub royalty: HashMap<AccountId, u32>,
-    pub token_type: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -24,5 +23,4 @@ pub struct JsonToken {
 
     // CUSTOM - fields
     pub royalty: HashMap<AccountId, u32>,
-    pub token_type: Option<String>,
 }

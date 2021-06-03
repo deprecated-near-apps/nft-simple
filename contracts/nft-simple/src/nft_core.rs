@@ -165,12 +165,6 @@ impl NonFungibleTokenCore for Contract {
                 }
             }
             
-            // payout to contract owner - may be previous token owner, they get remainder of balance
-            if self.contract_royalty > 0 && self.owner_id != owner_id {
-                payout.insert(self.owner_id.clone(), royalty_to_payout(self.contract_royalty, balance_u128));
-                total_perpetual += self.contract_royalty;
-            }
-            assert!(total_perpetual <= MINTER_ROYALTY_CAP + CONTRACT_ROYALTY_CAP, "Royalties should not be more than caps");
             // payout to previous owner
             payout.insert(owner_id, royalty_to_payout(10000 - total_perpetual, balance_u128));
 
@@ -252,19 +246,11 @@ impl NonFungibleTokenCore for Contract {
         refund_deposit(storage_used);
 
         if let Some(msg) = msg {
-            
-            // CUSTOM - add token_type to msg
-            let mut final_msg = msg;
-            let token_type = token.token_type;
-            if let Some(token_type) = token_type {
-                final_msg.insert_str(final_msg.len() - 1, &format!(",\"token_type\":\"{}\"", token_type));
-            }
-
             ext_non_fungible_approval_receiver::nft_on_approve(
                 token_id,
                 token.owner_id,
                 approval_id,
-                final_msg,
+                msg,
                 &account_id,
                 NO_DEPOSIT,
                 env::prepaid_gas() - GAS_FOR_NFT_APPROVE,
@@ -315,7 +301,6 @@ impl NonFungibleTokenCore for Contract {
                 metadata,
                 royalty: token.royalty,
                 approved_account_ids: token.approved_account_ids,
-                token_type: token.token_type,
             })
         } else {
             None
